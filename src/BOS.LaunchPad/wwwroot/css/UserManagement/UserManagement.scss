@@ -1,0 +1,19 @@
+﻿.BOSEdit_User {
+    background-color: #fff;
+    font-size: 14px;
+    padding: 10px;
+    box-shadow: 0 0px 10px rgba(0, 0, 0, 0.20);
+    border-radius: 4px;
+
+    .btn-primary {
+        color: #fff;
+        background-color: #171717;
+        border-color: #000000;
+
+        &:hover, &:focus {
+            background-color: #000;
+            border-color: #171717;
+            outline: none;
+        }
+    }
+}

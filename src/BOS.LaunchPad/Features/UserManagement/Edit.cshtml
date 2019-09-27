@@ -1,0 +1,101 @@
+﻿@model BOS.LaunchPad.Features.UserManagement.EditUserViewModel
+@{
+    Layout = null;
+}
+
+<form asp-controller="UserManagement" asp-action="Edit" method="post">
+    <input type="hidden" asp-for="@Model.Id" />
+    <input type="hidden" asp-for="@Model.Email" />
+    <input type="hidden" asp-for="@Model.Username" />
+    <input type="hidden" asp-for="@Model.FirstName" />
+    <input type="hidden" asp-for="@Model.LastName" />
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 form-label pt-2">
+                <label asp-for="@Model.FirstNameRecord">First Name</label>
+            </div>
+            <div class="col-md-9">
+                <div class="form-group">
+                    <input asp-for="@Model.FirstNameRecord" class="form-control form-control-sm" autofocus />
+                    <span asp-validation-for="@Model.FirstNameRecord" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 form-label pt-2">
+                <label asp-for="@Model.LastNameRecord">Last Name</label>
+            </div>
+            <div class="col-md-9">
+                <div class="form-group">
+                    <input asp-for="@Model.LastNameRecord" class="form-control form-control-sm" />
+                    <span asp-validation-for="@Model.LastNameRecord" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 form-label pt-2">
+                <label asp-for="@Model.EmailRecord">Email</label>
+            </div>
+            <div class="col-md-9">
+                <div class="form-group">
+                    <input asp-for="@Model.EmailRecord" class="form-control form-control-sm" />
+                    <span asp-validation-for="@Model.EmailRecord" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 form-label pt-2">
+                <label asp-for="@Model.UsernameRecord">Username</label>
+            </div>
+            <div class="col-md-9">
+                <div class="form-group">
+                    <input asp-for="@Model.UsernameRecord" class="form-control form-control-sm" />
+                    <span asp-validation-for="@Model.UsernameRecord" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 form-label pt-2">
+                Roles
+            </div>
+            <div class="col-md-9">
+                <div class="form-group">
+                    <dl>
+                        @foreach (var r in Model.AssignedRoles)
+                        {
+                            <dd class="ml-3"><input name="SelectedRoles" type="checkbox" id="@r.Id" checked="checked" value="@r.Id" />@r.Name</dd>
+                        }
+                        @foreach (var r in Model.NotAssignedRoles)
+                        {
+                            <dd class="ml-3"><input name="SelectedRoles" type="checkbox" id="@r.Id" value="@r.Id" />@r.Name</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-right">
+        <a href="~/UserManagement/Index" class="cancel-link" data-dismiss="modal" aria-label="Close">Cancel</a>
+        <button class="btn btn-light btn-sm"> Update</button>
+    </div>
+</form>
+
+
+<environment include="Development">
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"
+            asp-fallback-src="~/lib/jquery-validation/dist/jquery.validate.min.js"
+            asp-fallback-test="window.jQuery && window.jQuery.validator"
+            crossorigin="anonymous"
+            integrity="sha384-rZfj/ogBloos6wzLGpPkkOr/gpkBNLZ6b6yLy4o+ok+t/SAKlL5mvXLr0OXNi1Hp">
+    </script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.9/jquery.validate.unobtrusive.min.js"
+            asp-fallback-src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"
+            asp-fallback-test="window.jQuery && window.jQuery.validator && window.jQuery.validator.unobtrusive"
+            crossorigin="anonymous"
+            integrity="sha384-ifv0TYDWxBHzvAk2Z0n8R434FL1Rlv/Av18DXE43N/1rvHyOG4izKst0f2iSLdds">
+    </script>
+</environment>

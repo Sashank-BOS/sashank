@@ -1,0 +1,230 @@
+﻿@using BOS.LaunchPad.Features.Home;
+@using BOS.LaunchPad.Models;
+@using BOS.IA.Client.ClientModels;
+@model BOS.LaunchPad.Features.Home.HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+<div class="container p-0 m-0">
+    <div class="row">
+        <div class="col-md-4 p-2">
+            <h4>Dashboard</h4>
+        </div>
+        <div class="col-md-4 p-2">
+        </div>
+        <div class="col-md-4 p-2 text-right">
+            <h5 style="font-size:14px;">Welcome @Model.Username</h5>
+            <h5 style="font-size:14px;"><b>Email :</b> @Model.Email</h5>
+        </div>
+    </div>
+    @*@if (Model.IsAdmin)
+        {
+            <div class="row" style="margin-top:20px;">
+                <div class="col-md-12 mb-2">
+                    <h4>Admin:</h4>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="BOS20dashboard_card" style="">
+                        <h5>
+                            <a asp-controller="UserManagement" asp-action="Index"><i class="fas fa-user"></i> User Management</a>
+                        </h5>
+
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="BOS20dashboard_card">
+                        <h5>
+                            <a asp-controller="RoleManagement" asp-action="Index"><i class="fas fa-users"></i> Role Management</a>
+                        </h5>
+
+                    </div>
+                </div>
+            </div>
+        }*@
+ @if (Model.IsAdmin==false)
+    {
+    <div class="row flex-row" style="margin-top:1.5em" id="modules">
+        <div class="col-md-12 mb-2">
+            <h5 class="float-left">Permitted Modules and Operations:</h5>
+            <div class="float-right pr-4">
+                <a href="#" class="ui-in-page" onclick="expand();" id="expandAll"><i class="fas fa-angle-down"></i> Expand</a>
+                <a href="#" class="ui-in-page d-none" onclick="collapse();" id="collapseAll"><i class="fas fa-angle-up"></i> Collapse</a>
+            </div>
+        </div>
+
+        @*@foreach (var module in Model.Modules)
+        {
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="BOS20dashboard_card">
+                    <h5>@module.Name</h5>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var op in module.Operations)
+                        {
+                            <li class="list-group-item">
+                                @op.Name
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }*@
+        @foreach (var module in Model.Modules)
+        {
+            PermissionsSet PermissionSet = null;
+            <div class="col-md-4 col-sm-6 mt-2 mb-2">
+                <div class="BOS20dashboard_card">
+                    <ul class="list-group list-group-flush mt-2 js_module_container">
+                        <li class="list-group list-group-flush js_module@((module.ChildModules == null || module.ChildModules.Count == 0)?" js_module_child" : " js_module_parent")">
+                            @if (PermissionSet != null)
+                            {
+                                <strong  id="@module.Id" code="@module.Code"><i class="fas fa-check-circle mr-2 text-success"></i>@module.Name</strong>
+                            }
+                            else if (Model.IsAdmin)
+                            {
+                                <strong id="@module.Id" code="@module.Code"><i class="fas fa-check-circle mr-2 text-success"></i>@module.Name</strong>
+                            }
+                            else
+                            {
+                                <i class="fas fa-check-circle mr-2 text-secondary"></i>@module.Name
+                            }
+                            <ul class="collapse list-group list-group-flush d-none">
+
+                                @foreach (var operation in module.Operations)
+                                {
+                                    <li class="list-group-item js_operation@((operation.ChildOperations == null || operation.ChildOperations.Count == 0) ? " js_op_child" : " js_op_parent")">
+                                        @if (Model.IsAdmin == false && PermissionSet != null && PermissionSet.Permissions.Any(p => p.Id == operation.Id) == true)
+                                        {
+                                            <i class="fas fa-check-circle mr-2 text-success"></i>@operation.Name
+                                        }
+                                        else if (Model.IsAdmin)
+                                        {
+                                            <i class="fas fa-check-circle mr-2 text-success"></i>@operation.Name
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-check-circle mr-2 text-secondary"></i>@operation.Name
+                                        }
+                                        @if (operation.ChildOperations != null && operation.ChildOperations.Count > 0)
+                                        {
+                                            <partial name="_PaintChildOperations_InPermissions" model="@new SetPermissionsViewModel() { Permissions=Model.Permissions, Operations = operation.ChildOperations,IsAdmin=true
+                                         }" />
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                            @if (module.ChildModules != null && module.ChildModules.Count > 0)
+                            {
+                                <partial name="_PaintChildModules_InPermissions" model="@new SetModulePermissionsViewModel () {Modules= module.ChildModules,Permissions=Model.Permissions,IsAdmin=true}" />
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
+    </div>
+    }
+    else if (Model.Permissions.Count >= 0)
+    {
+        <div class="row" style="margin-top:1.5em" id="modules">
+            <div class="col-md-12 mb-2">
+                <h5 class="float-left">Permitted Modules and Operations:</h5>
+                <div class="float-right pr-4">
+                    <a href="#" class="ui-in-page" onclick="expand();" id="expandAll"><i class="fas fa-angle-down"></i> Expand</a>
+                    <a href="#" class="ui-in-page d-none" onclick="collapse();" id="collapseAll"><i class="fas fa-angle-up"></i> Collapse</a>
+                </div>
+            </div>
+            @foreach (var module in Model.Modules)
+            {
+                PermissionsSet PermissionSet = Model.Permissions.FirstOrDefault(p => p.ReferenceId == module.Id);
+                <div class="col-md-4 col-sm-6 mt-2 mb-2">
+                    <div class="BOS20dashboard_card">
+                        <ul class="list-group list-group-flush mt-2 js_module_container">
+                            <li class="list-group list-group-flush js_module@((module.ChildModules == null || module.ChildModules.Count == 0)?" js_module_child" : " js_module_parent")">
+                                @if (PermissionSet != null)
+                                {
+                                    <strong  id="@module.Id" code="@module.Code"><i class="fas fa-check-circle mr-2 text-success"></i>@module.Name</strong>
+                                }
+                                @*else if (Model.IsAdmin)
+                                {
+                                    <strong id="@module.Id" code="@module.Code"><i class="fas fa-check-circle mr-2 text-success"></i>@module.Name</strong>
+                                }*@
+                                else
+                                {
+                                    <strong id="@module.Id" code="@module.Code"><i class="fas fa-minus-circle text-danger mr-2"></i>@module.Name</strong>
+                                }
+                                <ul class="collapse list-group list-group-flush d-none">
+                                    @if (PermissionSet != null)
+                                    {
+                                        List<IOperation> operations = (PermissionSet.Permissions != null && PermissionSet.Permissions.Count > 0) ? module.Operations.Where(o => PermissionSet.Permissions.Select(p => p.Id).Contains(o.Id)).ToList() : module.Operations.ToList();
+
+                                        @foreach (var operation in operations)
+                                        {
+                                            <li class="list-group-item js_operation@((operation.ChildOperations == null || operation.ChildOperations.Count == 0) ? " js_op_child" : " js_op_parent")">
+                                                @if (Model.IsAdmin == false && PermissionSet != null && PermissionSet.Permissions.Any(p => p.Id == operation.Id) == true)
+                                                {
+                                                    <i class="fas fa-check-circle mr-2 text-success"></i>@operation.Name
+                                                }
+                                                else if (Model.IsAdmin)
+                                                {
+                                                    <i class="fas fa-check-circle mr-2 text-success"></i>@operation.Name
+                                                }
+                                                else
+                                                {
+                                                    <i class="fas fa-minus-circle text-danger mr-2"></i>@operation.Name
+                                                }
+                                                @if (operation.ChildOperations != null && operation.ChildOperations.Count > 0)
+                                                {
+                                                    <partial name="_PaintChildOperations_InPermissions" model="@new SetPermissionsViewModel() { Permissions = Model.Permissions,  Operations = operation.ChildOperations ,IsAdmin=false }" />
+                                                }
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                                @if (module.ChildModules != null && module.ChildModules.Count > 0)
+                                {
+                                    <partial name="_PaintChildModules_InPermissions.cshtml" model="@new SetModulePermissionsViewModel () {Modules= module.ChildModules,Permissions=Model.Permissions,IsAdmin=false  }" />
+                                }
+
+                               </li>
+                        </ul>                           
+                            
+                    </div>
+                </div>
+            }           
+        </div>
+    }
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    </environment>
+    <script>
+        function expand() {
+            $("#modules").children().find('ul.collapse').removeClass("d-none").addClass("d-block");
+            $("#collapseAll").removeClass("d-none");
+            $("#expandAll").addClass("d-none");
+        }
+
+        function collapse() {
+            $("#modules").children().find('ul.collapse').addClass("d-none").removeClass("d-block");
+            $("#expandAll").removeClass("d-none");
+            $("#collapseAll").addClass("d-none");
+        }
+        $(document).ready(function () {
+
+            if ($("#mainContent").children().children().length == 1) {
+                $("#mainContent").children().append('<div class="row"><h3 style="margin-top:20%;margin-left:20%;">You do not have any Modules and Operations!</h3></div>');
+            }
+
+            $("#home").addClass("active");
+            $("#roleManagement").removeClass("active");
+            $("#userManagement").removeClass("active");
+            $("#permissionManagement").removeClass("active");
+
+            $("#sidebar-master").children().find(".nav-item").removeClass("active");
+            $("#application").addClass("active");
+
+        });
+    </script>

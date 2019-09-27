@@ -1,0 +1,35 @@
+﻿@using BOS.IA.Client.ClientModels;
+@model List<IOperation>
+
+
+<ul>
+    @*<li>
+        <span><i class="icon-folder-open"></i> Operations</span>
+        <a href="">Goes somewhere</a></li>*@
+        @foreach (var op in Model)
+        {
+            <li>
+                <span><i class="icon-leaf"></i>  @op.Name</span>
+                <a href="">Goes somewhere</a>
+                @if (op.ChildOperations == null && op.ChildOperations.Count > 0)
+                {
+                    <partial name="_PaintChildOperations" model="@op.ChildOperations" />
+                }
+            </li>
+        }
+ </ul>
+
+
+@*<ul class="list-group list-group-flush">
+        <li class="list-group-item">Operations</li>
+        @foreach (var op in Model)
+        {
+            <li class="list-group-item">
+                @op.Name
+                @if (op.ChildOperations == null op.ChildOperations.Count > 0)
+                {
+                    <partial name="_PaintChildOperations" model="@op.ChildOperations" />
+                }
+            </li>
+        }
+</ul>*@

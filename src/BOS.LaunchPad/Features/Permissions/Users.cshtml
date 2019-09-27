@@ -1,0 +1,468 @@
+﻿@model BOS.LaunchPad.Features.Permissions.PermissionsViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "User permissions";
+}
+@{
+    var uId = ""; var uName = ""; var uRoles = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("UserId") != null)
+    {
+        uId = HttpContextAccessor.HttpContext.Session.GetString("UserId");
+        uName = HttpContextAccessor.HttpContext.Session.GetString("UserName");
+        uRoles = HttpContextAccessor.HttpContext.Session.GetString("UserRoles");
+    }
+}
+<div>
+    <h4 class="pt-2">
+        Permissions
+        <span id="view-edit-toggle">
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-secondary btn-sm active" onclick="viewClick(this);" style="cursor:pointer;">
+                    <input type="radio" name="options" id="option1" autocomplete="off" checked> View
+                </label>
+                <label class="btn btn-secondary btn-sm" onclick="editClick(this);" style="cursor:pointer;">
+                    <input type="radio" name="options" id="option2" autocomplete="off"> Edit
+                </label>
+            </div>
+        </span>
+    </h4>
+    <!-- Custom Coding Starts Here -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 mt-3">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" onclick="rolesTab(this);">
+                        <a class="nav-link" id="home-tab" data-toggle="tab" href="#" role="tab" aria-controls="home" aria-selected="true"><i class="fas fa-users"></i> Roles</a>
+                    </li>
+                    <li class="nav-item" onclick="usersTab(this);">
+                        <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#" role="tab" aria-controls="profile" aria-selected="false"><i class="fas fa-user"></i> Users</a>
+                    </li>
+                    <li class="nav-item" onclick="modulesTab(this);">
+                        <a class="nav-link" id="contact-tab" data-toggle="tab" href="#" role="tab" aria-controls="contact" aria-selected="false"><i class="fas fa-cube"></i> Modules</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 mt-3">
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" id="searchUsers" aria-describedby="search" placeholder="Search by name" onkeyup="filterUsers();">
+                    </div>
+                </form>
+                <ul class="list-group list-group-flush scrollable_ul" id="permissions-list">
+                    @foreach (var user in Model.Users)
+                    {
+                        var activeClass = "";
+                        @if (user.Id.ToString().ToLower().Equals(uId.ToLower()))
+                        {
+                            activeClass = "active";
+                        }
+                        var myRoles = "";
+                        @foreach (var role in @user.Roles)
+                        {
+                            @if (myRoles == "")
+                            {
+                                myRoles = role.Role.Name;
+                            }
+                            else
+                            {
+                                myRoles += "," + role.Role.Name;
+                            }
+                        }
+                        <li class="list-group-item @activeClass" id="@user.Id" lastname="@user.LastName" firstname="@user.FirstName" onclick="fetchModules(this);" roles="@myRoles">
+                            <a href="#"><i class="fas fa-user"></i> @user.LastName, @user.FirstName</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="col-md-9 mt-3">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span class="float-right">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="pr-4">
+                                            <a href="#" class="ui-in-page" onclick="expand();" id="expandAll"><i class="fas fa-angle-down"></i> Expand</a>
+                                            <a href="#" class="ui-in-page d-none" onclick="collapse();" id="collapseAll"><i class="fas fa-angle-up"></i> Collapse</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </span>
+                            <h5 id="userNameHeader">
+                                @uName
+                                @if (uRoles != "")
+                                {
+                                    <span class="user-type badge badge-secondary"> @uRoles</span>
+                                }
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="row mt-4" id="modules">
+                        @foreach (var module in Model.AssignedModules)
+                        {
+                            <div class="module">
+                                <strong><i class="fas fa-check-circle text-success mr-2"></i>@module.Name</strong>
+                                <ul class="mt-2 d-none">
+                                    @foreach (var operation in module.Operations)
+                                    {
+                                        <li class="js_operation@((operation.ChildOperations == null || operation.ChildOperations.Count == 0)?" js_op_child" : " js_op_parent")">
+                                            <i class="fas fa-check-circle mr-2@((((BOS.LaunchPad.Models.Operation)operation).IsAssigned==true)?" text-success":" text-secondary")"></i>@operation.Name
+                                            @if (operation.ChildOperations != null && operation.ChildOperations.Count > 0)
+                                            {
+                                                <partial name="_PaintChildOperations_InPermissions" model="@operation.ChildOperations" />
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                                @if (module.ChildModules != null && module.ChildModules.Count > 0)
+                                {
+                                    <partial name="_PaintChildModules_InPermissions.cshtml" model="@module.ChildModules" />
+                                }
+                            </div>
+                        }
+                        @foreach (var module in Model.PartiallyAssignedModules)
+                        {
+                            <div class="module">
+                                <strong><i class="fas fa-check-circle text-secondary mr-2"></i>@module.Name</strong>
+                                <ul class="mt-2 d-none">
+                                    @foreach (var operation in module.Operations)
+                                    {
+                                        <li class="js_operation@((operation.ChildOperations == null || operation.ChildOperations.Count == 0)?" js_op_child" : " js_op_parent")">
+                                            <i class="fas fa-check-circle mr-2@((((BOS.LaunchPad.Models.Operation)operation).IsAssigned==true)?" text-success":" text-secondary")"></i>                                @operation.Name
+                                            @if (operation.ChildOperations != null && operation.ChildOperations.Count > 0)
+                                            {
+                                                <partial name="_PaintChildOperations_InPermissions" model="@operation.ChildOperations" />
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+
+                                @if (module.ChildModules != null && module.ChildModules.Count > 0)
+                                {
+                                    <partial name="_PaintChildModules_InPermissions.cshtml" model="@module.ChildModules" />
+                                }
+                            </div>
+                        }
+                        @foreach (var module in Model.NotAssignedModules)
+                        {
+                            <div class="module">
+                                <strong><i class="fas fa-minus-circle text-danger mr-2"></i>@module.Name</strong>
+                                <ul class="mt-2 d-none">
+                                    @foreach (var operation in module.Operations)
+                                    {
+                                        <li class="js_operation@((operation.ChildOperations == null || operation.ChildOperations.Count == 0)?" js_op_child" : " js_op_parent")">
+                                            <i class="fas fa-check-circle mr-2@((((BOS.LaunchPad.Models.Operation)operation).IsAssigned==true)?" text-success":" text-secondary")"></i>@operation.Name
+                                            @if (operation.ChildOperations != null && operation.ChildOperations.Count > 0)
+                                            {
+                                                <partial name="_PaintChildOperations_InPermissions" model="@operation.ChildOperations" />
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+
+                                @if (module.ChildModules != null && module.ChildModules.Count > 0)
+                                {
+                                    <partial name="_PaintChildModules_InPermissions.cshtml" model="@module.ChildModules" />
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<environment include="Development">
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/popper.js/popper.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+</environment>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
+<script>
+
+    var usersArray = '';
+    var filteredUsers = '';
+
+    $(document).ready(function () {
+        String.prototype.replaceAll = function (search, replacement) {
+            var target = this;
+            return target.replace(new RegExp(search, 'g'), replacement);
+        };
+        usersArray = @Html.Raw(Json.Serialize(Model.Users));
+        $("#home").removeClass("active");
+        $("#roleManagement").removeClass("active");
+        $("#userManagement").removeClass("active");
+        $("#permissionManagement").addClass("active");
+
+    });
+
+    function rolesTab(val) {
+        if (!$(val).children().hasClass("active")) {
+            $(".nav-item").children().find('a').removeClass("active");
+            $(val).children().find('a').addClass("active");
+            location.href = "@Url.Action("Index", "Permissions")";
+        }
+    }
+
+    function usersTab(val) {
+        if (!$(val).children().hasClass("active")) {
+            $(".nav-item").children().find('a').removeClass("active");
+            $(val).children().find('a').addClass("active");
+            location.href = "@Url.Action("Users", "Permissions")";
+        }
+    }
+
+    function modulesTab(val) {
+        if (!$(val).children().find('a').hasClass("active")) {
+            $(".nav-item").children().find('a').removeClass("active");
+            $(val).children().find('a').addClass("active");
+            location.href = "@Url.Action("Modules", "Permissions")";
+        }
+    }
+
+    function filterUsers() {
+        filteredUsers = $.grep(usersArray, function (el) {
+            return (el.FirstName.toLowerCase().startsWith($("#searchUsers").val()) || el.LastName.toLowerCase().startsWith($("#searchUsers").val()))
+        });
+        if (filteredUsers != "") {
+            if (filteredUsers.length > 0) {
+                $("#permissions-list").empty();
+                for (var i = 0; i < filteredUsers.length; i++) {
+                    var myRoles = "";
+                    if (filteredUsers[i].Roles.length > 0) {
+                        for (var j = 0; j < filteredUsers[i].Roles.length; j++) {
+                            if (myRoles == "") {
+                                myRoles = filteredUsers[i].Roles[j].Role.Name;
+                            }
+                            else {
+                                myRoles += "," + filteredUsers[i].Roles[j].Role.Name;
+                            }
+                        }
+                    }
+                    $("#permissions-list").append('<li class="list-group-item" id="' + filteredUsers[i].Id + '" lastname="' + filteredUsers[i].LastName + '" firstname="' + filteredUsers[i].FirstName + '" onclick="fetchModules(this);" roles="' + myRoles + '"><a href="#"><i class="fas fa-user"></i> ' + filteredUsers[i].LastName + ' , ' + filteredUsers[i].FirstName + '</a></li>');
+                }
+            }
+        }
+        if ($("#searchUsers").val() == "") {
+            $(".list-group-item").first().trigger("click");
+        }
+    }
+
+    function expand() {
+        $("#modules").children().find('ul').removeClass("d-none").addClass("d-block");
+        $("#collapseAll").removeClass("d-none");
+        $("#expandAll").addClass("d-none");
+    }
+
+    function collapse() {
+        $("#modules").children().find('ul').addClass("d-none").removeClass("d-block");
+        $("#expandAll").removeClass("d-none");
+        $("#collapseAll").addClass("d-none");
+    }
+
+    function viewClick(val) {
+        if (!$(val).hasClass("active")) {
+            $("#view-edit-toggle").children().find('label').removeClass("active");
+            $(val).addClass("active");
+            location.href = "@Url.Action("Users", "Permissions")";
+        }
+    }
+
+    function editClick(val) {
+        if (!$(val).hasClass("active")) {
+            $("#view-edit-toggle").children().find('label').removeClass("active");
+            $(val).addClass("active");
+            location.href = "@Url.Action("EditUserPermissions", "Permissions")";
+        }
+    }
+
+    var name = '', roles = '';
+    function fetchModules(val) {
+        $("#loadingPanel").removeClass("d-none");
+        name = $(val).attr("lastname") + ", " + $(val).attr("firstname");
+        roles = $(val).attr("roles");
+        var id = $(val).attr("id");
+        var mode = "user";
+        $.get("@Url.Action("FetchModules", "Permissions")?id=" + id + "&name=" + name + "&mode=" + mode + "&roles=" + roles,
+            function (data) {
+                $("#loadingPanel").addClass("d-none");
+                $("#modules").empty();
+                if (data.AssignedModules.length > 0) {
+                    PaintTree(data.AssignedModules, "#modules", " text-success");                      
+                }
+                if (data.PartiallyAssignedModules.length > 0) {
+                    PaintTree(data.PartiallyAssignedModules, "#modules", " text-secondary");
+                }
+                if (data.NotAssignedModules.length > 0) {
+                    PaintTree(data.NotAssignedModules, "#modules", " text-danger");
+                }
+                $("#userNameHeader").text(name + " ");
+                if (roles != "")
+                $("#userNameHeader").append('<span class="user-type badge badge-secondary">  ' + roles + '</span>');
+                $("#permissions-list").children().removeClass("active")
+                $(val).addClass("active");
+                expand();
+            });
+    }
+
+ function PaintTree(Modules,container,IsAssignedClass) {
+        container = (container == null || container == undefined) ? "#modules" : container;
+        for (var i = 0; i < Modules.length; i++) {
+            debugger;
+            var template = $("#module_container_initial_template").html();
+            template = template.replace('{Id}', Modules[i].Id);
+            template = template.replaceAll('{Name}', Modules[i].Name);
+            template = template.replaceAll('{Code}', Modules[i].Code);
+            if (IsAssignedClass != null && IsAssignedClass != undefined)
+                template = template.replaceAll('{IsActiveClass}', IsAssignedClass);
+            else
+                template = template.replaceAll('{IsActiveClass}', (Modules[i].IsAssigned == true) ? " text-success" : " text-secondary");
+            var OperationsTemplate = "";
+            var childOperationsContainer = $("#OperationsContainer_template").html();
+            if (Modules != null && Modules[i] != null && Modules[i].Operations != null && Modules[i].Operations != undefined && Modules[i].Operations.length > 0) {
+                ChildOperationsTemplate = PaintOperations(Modules[i].Operations);
+                childOperationsContainer = childOperationsContainer.replaceAll('{ChildOperationsList}', ChildOperationsTemplate);
+            }
+            else {
+                childOperationsContainer = childOperationsContainer.replaceAll('{ChildOperationsList}', "");
+            }
+            template = template.replaceAll('{ChildOperationsList}', childOperationsContainer);
+            var ChildModulesTemplate = "";
+            var childModulesContainer = $("#ModuleContainer_template").html();
+            if (Modules != null && Modules[i] != null && Modules[i].ChildModules != null && Modules[i].ChildModules != undefined && Modules[i].ChildModules.length > 0) {
+                ChildModulesTemplate = PaintModules(Modules[i].ChildModules);
+                childModulesContainer = childModulesContainer.replaceAll('{ChildModulesList}', ChildModulesTemplate);
+            }
+            else {
+                childModulesContainer = childModulesContainer.replaceAll('{ChildModulesList}', "");
+            }
+            template = template.replaceAll('{ChildModulesList}', childModulesContainer);
+            $(container).append($(template));
+        }
+    }
+    function PaintModules(Modules,IsAssignedClass) {
+        var finalTagsHtml = "";
+        $.each(Modules, function (index, response) {
+            var template = "";
+            var responseHtml = $("#Module_Template").html();
+            responseHtml = responseHtml.replaceAll('{Id}', response.Id);
+            responseHtml = responseHtml.replaceAll('{Name}', response.Name);
+            responseHtml = responseHtml.replaceAll('{Code}', response.Code);
+            responseHtml = responseHtml.replaceAll('{ParentChildClass}', (response.ChildModules == null || response.ChildModules == undefined || response.ChildModules.length == 0) ? " js_module_child" : " js_module_parent");
+            if (IsAssignedClass != null && IsAssignedClass != undefined)
+                template = template.replaceAll('{IsActiveClass}', IsAssignedClass);
+            else
+            responseHtml = responseHtml.replaceAll('{IsActiveClass}', (response.IsAssigned == true) ? " text-success" : " text-secondary");
+
+            if (response.Operations != null && response.Operations != undefined && response.Operations.length > 0) {
+                var childOperationResponseHtml = PaintOperations(response.Operations);
+                debugger;
+                var childOperationsContainer = $("#OperationsContainer_template").html();
+                childOperationsContainer = childOperationsContainer.replaceAll('{ChildOperationsList}', childOperationResponseHtml);
+                responseHtml = responseHtml.replaceAll('{ChildOperationsList}', childOperationsContainer);
+            }
+            else {
+                responseHtml = responseHtml.replaceAll('{ChildOperationsList}', "");
+            }
+            if (response.ChildModules != null && response.ChildModules != undefined && response.ChildModules.length > 0) {
+                var childResponseHtml = PaintModules(response.ChildModules);
+                var childModulesContainer = $("#ModuleContainer_template").html();
+                debugger;
+                childModulesContainer = childModulesContainer.replaceAll('{ChildModulesList}', childResponseHtml);
+                responseHtml = responseHtml.replaceAll('{ChildModulesList}', childModulesContainer);
+            }
+            else {
+                responseHtml = responseHtml.replaceAll('{ChildModulesList}', "");
+            }
+            finalTagsHtml = finalTagsHtml + responseHtml;
+        });
+        return finalTagsHtml;
+    }
+    function PaintOperations(Operations, IsAssignedClass) {
+        var finalTagsHtml = "";
+        $.each(Operations, function (index, response) {
+            var template = "";
+            var responseHtml = $("#View_Operation_Template").html();
+            responseHtml = responseHtml.replaceAll('{Id}', response.Id);
+            responseHtml = responseHtml.replaceAll('{Name}', response.Name);
+            responseHtml = responseHtml.replaceAll('{Code}', response.Code);
+            responseHtml = responseHtml.replaceAll('{ParentChildClass}', (response.ChildOperations == null || response.ChildOperations == undefined || response.ChildOperations.length == 0) ? " js_op_child" : " js_op_parent");
+            if (IsAssignedClass != null && IsAssignedClass != undefined)
+                template = template.replaceAll('{IsActiveClass}', IsAssignedClass);
+            else
+                responseHtml = responseHtml.replaceAll('{IsActiveClass}', (response.IsAssigned == true) ? " text-success" : " text-secondary");
+            responseHtml = responseHtml.replaceAll('{Checked}', (response.IsAssigned == true) ? "checked" : "");
+            if (response.ChildOperations != null && response.ChildOperations != undefined && response.ChildOperations.length > 0) {
+                var childOperationResponseHtml = PaintOperations(response.ChildOperations);
+                debugger;
+                var childOperationsContainer = $("#OperationsContainer_template").html();
+                childOperationsContainer = childOperationsContainer.replaceAll('{ChildOperationsList}', childOperationResponseHtml);
+                responseHtml = responseHtml.replaceAll('{ChildOperationsList}', childOperationsContainer);
+            }
+            else {
+                responseHtml = responseHtml.replaceAll('{ChildOperationsList}', "");
+            }
+            finalTagsHtml = finalTagsHtml + responseHtml;
+        });
+        return finalTagsHtml;
+    }
+</script>
+<script type="text/html" id="module_container_initial_template">
+    <div class="module">
+        <strong id="{Id}" code="{Code}"><i class="fas fa-check-circle mr-2{IsActiveClass}"></i>{Name}</strong>
+        {ChildOperationsList}
+        {ChildModulesList}
+    </div>
+</script>
+
+<script type="text/html" id="ModuleContainer_template">
+    <ul class="mt-2 d-none js_module_container">
+        {ChildModulesList}
+    </ul>
+</script>
+
+<script type="text/html" id="OperationsContainer_template">
+    <ul class="mt-2 d-none js_op_container">
+        {ChildOperationsList}
+    </ul>
+</script>
+
+
+<script type="text/html" id="Module_Template">
+    <li class="js_module{ParentChildClass}">
+        <strong id="{Id}" code="{Code}"><i class="fas fa-check-circle mr-2{IsActiveClass}"></i>{Name}</strong>
+        <ul class="mt-2 d-none js_op_container">
+            {ChildOperationsList}
+        </ul>
+        {ChildModulesList}
+    </li>
+</script>
+
+<script type="text/html" id="Edit_Operation_Template">
+    <li class="js_operation{ParentChildClass}">
+        <input type="checkbox" {Checked} class="mr-2{Checked}" id="{Id}" code="{Code}">{Name}
+        {ChildOperationsList}
+    </li>
+</script>
+
+<script type="text/html" id="View_Operation_Template">
+    <li class="js_operation{ParentChildClass}">
+        <i class="fas fa-check-circle mr-2{IsActiveClass}"></i>{Name}
+        {ChildOperationsList}
+    </li>
+</script>
+
+

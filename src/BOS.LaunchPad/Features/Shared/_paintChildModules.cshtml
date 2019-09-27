@@ -1,0 +1,80 @@
+﻿@using  BOS.IA.Client.ClientModels;
+@model List<IModule>
+
+
+<ul>
+    @*<li> <span><i class="icon-folder-open"></i> Modules</span></li>*@
+    @foreach (var module in Model)
+    {
+        <li>
+            <span><i class="icon-minus-sign"></i> @module.Name</span>
+            <a href="">Goes somewhere</a>
+
+            @if (module.Operations != null && module.Operations.Count > 0)
+            {
+                <ul>
+                    <li>
+                        <span><i class="icon-minus-sign"></i> Operations</span>
+                        <a href="">Goes somewhere</a></li>
+                        @foreach (var op in module.Operations)
+                        {
+                            <li>
+                                <span><i class="icon-minus-sign"></i> @op.Name</span>
+                                <span class="caret">
+                                    
+                                </span>
+                                @if (op.ChildOperations == null && op.ChildOperations.Count > 0)
+                                {
+                                    <partial name="_PaintChildOperations" model="@op.ChildOperations" />
+                                }
+                            </li>
+                      }
+                    </ul>
+            }
+
+            @if (module.ChildModules != null && module.ChildModules.Count > 0)
+            {
+                <partial name="_PaintChildModules" model="@module.ChildModules" />
+            }
+
+        </li>
+        }
+    </ul>
+
+
+
+
+@*<ul class="list-group list-group-flush nested">
+        <li class="list-group-item">Modules</li>
+        @foreach (var module in Model)
+        {
+            <li class="list-group-item">
+                <span class="caret">@module.Name</span>
+
+                @if (module.Operations != null && module.Operations.Count>0)
+                {
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Operations</li>
+                        @foreach (var op in module.Operations)
+                        {
+                            <li class="list-group-item">
+                                <span class="caret">
+                                    @op.Name
+                                </span>
+                                @if (op.ChildOperations == null && op.ChildOperations.Count>0)
+                                {
+                                    <partial name="_PaintChildOperations" model="@op.ChildOperations" />
+                                }
+                           </li>
+                        }
+                    </ul>
+                }
+
+                @if (module.ChildModules != null && module.ChildModules.Count > 0)
+                {
+                    <partial name="_PaintChildModules" model="@module.ChildModules" />
+                }
+
+            </li>
+        }
+    </ul>*@

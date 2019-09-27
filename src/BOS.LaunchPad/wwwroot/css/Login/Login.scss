@@ -1,0 +1,101 @@
+﻿@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700');
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px white inset !important;
+    }
+
+    .BOS2_login_form {
+        background-color: #fff;
+        font-size: 14px;
+        padding: 10px;
+        box-shadow: 0 0px 10px rgba(0, 0, 0, 0.20);
+        border-radius: 4px;
+
+        .card-wrapper {
+            width: 400px;
+        }
+
+
+        .card {
+            border-color: transparent;
+            box-shadow: 0 0px 10px rgba(0, 0, 0, 0.20);
+
+            &.fat {
+                padding: 10px;
+
+                .card-body {
+                    padding: 10px;
+                }
+            }
+
+            .card-title {
+                margin-bottom: 30px;
+            }
+        }
+
+        .form-control {
+            border: 1px solid #e0e0e0;
+            outline: none;
+
+            &:hover, &.active, &:focus {
+                outline: none;
+            }
+        }
+
+        .form-group label {
+            width: 100%;
+        }
+
+        .btn.btn-block {
+            padding: 12px 10px;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #171717;
+            border-color: #000000;
+
+            &:hover, &:focus {
+                background-color: #000;
+                border-color: #171717;
+                outline:none;
+            }
+        }
+
+        .footer {
+            margin: 40px 0;
+            color: #888;
+            text-align: center;
+        }
+    }
+}
+
+@media screen and (max-width: 425px) {
+    .BOS2_login_form .card-wrapper {
+        width: 90%;
+        margin: 0 auto;
+    }
+}
+
+@media screen and (max-width: 320px) {
+    .BOS2_login_form .card.fat {
+        padding: 0;
+
+        .card-body {
+            padding: 15px;
+        }
+    }
+}

@@ -1,0 +1,60 @@
+﻿@using BOS.IA.Client.ClientModels;
+@using BOS.LaunchPad.Features.Home;
+@using BOS.LaunchPad.Models;
+@model SetModulePermissionsViewModel
+
+
+<ul class="collapse d-none list-group list-group-flush js_module_container">
+
+    @foreach (var module in Model.Modules)
+    {
+        PermissionsSet PermissionSet = (Model.IsAdmin == false && Model.Permissions != null) ? Model.Permissions.FirstOrDefault(p => p.ReferenceId == module.Id) : null;
+    <li class="list-group-item js_module@((module.ChildModules == null || module.ChildModules.Count == 0)?" js_module_child" : " js_module_parent")">
+            @if (PermissionSet != null)
+            {
+                <strong id="@module.Id" code="@module.Code"><i class="fas fa-check-circle mr-2 text-success"></i>@module.Name</strong>
+            }
+            else if (Model.IsAdmin)
+            {
+                <strong id="@module.Id" code="@module.Code"><i class="fas fa-check-circle mr-2 text-success"></i>@module.Name</strong>
+            }
+            else
+            {
+                <strong id="@module.Id" code="@module.Code"><i class="fas fa-minus-circle text-danger mr-2"></i>@module.Name</strong>
+            }
+
+        @if (module.Operations != null && module.Operations.Count > 0)
+        {
+            <ul class="collapse d-none list-group list-group-flush mt-2 js_op_container">
+                @foreach (var op in module.Operations)
+                {
+                    <li class="list-group-item js_operation@((op.ChildOperations == null || op.ChildOperations.Count == 0)?" js_op_child" : " js_op_parent")">
+                        @if (Model.IsAdmin == false && PermissionSet != null && PermissionSet.Permissions.Any(p => p.Id == op.Id) == true)
+                        {
+                            <i class="fas fa-check-circle mr-2 text-success"></i>@op.Name
+                        }
+                        else if (Model.IsAdmin)
+                        {
+                            <i class="fas fa-check-circle mr-2 text-success"></i>@op.Name
+                        }
+                        else
+                        {
+                            <i class="fas fa-check-circle mr-2 text-secondary"></i>@op.Name
+                        }
+
+                        @if (op.ChildOperations != null && op.ChildOperations.Count > 0)
+                        {
+                            <partial name="_PaintChildOperations_InPermissions" model="@new SetPermissionsViewModel() { Permissions=Model.Permissions,  Operations = op.ChildOperations, IsAdmin=Model.IsAdmin  }" />
+                        }
+                    </li>
+                }
+            </ul>
+        }
+
+        @if (module.ChildModules != null && module.ChildModules.Count > 0)
+        {
+            <partial name="_PaintChildModules_InPermissions.cshtml" model="@new SetModulePermissionsViewModel () { Modules= module.ChildModules,Permissions=Model.Permissions, IsAdmin=Model.IsAdmin }" />
+        }
+    </li>
+      }
+</ul>

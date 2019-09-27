@@ -1,0 +1,33 @@
+﻿@using  BOS.IA.Client.ClientModels;
+@model List<IModule>
+
+
+<ul class="mt-2 d-none js_module_container">   
+    @foreach (var module in Model)
+    {
+        <li class="js_module@((module.ChildModules == null || module.ChildModules.Count == 0)?" js_module_child" : " js_module_parent")">
+            <strong id="@module.Id" code="@module.Code"><i class="fas fa-check-circle mr-2@((((BOS.LaunchPad.Models.Module)module).IsAssigned==true)?" text-success":" text-secondary")"></i>@module.Name</strong> 
+        @if (module.Operations != null && module.Operations.Count > 0)
+        {
+            <ul class="mt-2 d-none js_op_container">            
+                @foreach (var op in module.Operations)
+                {
+                    <li class="js_operation@((op.ChildOperations == null || op.ChildOperations.Count == 0)?" js_op_child" : " js_op_parent")">
+                        <i class="fas fa-check-circle mr-2@((((BOS.LaunchPad.Models.Operation)op).IsAssigned==true)?" text-success":" text-secondary")"></i>@op.Name
+                        @if (op.ChildOperations != null && op.ChildOperations.Count > 0)
+                        {
+                            <partial name="_PaintChildOperations_InPermissions" model="@op.ChildOperations" />
+                        }
+                    </li>
+                }
+            </ul>
+        }
+
+        @if (module.ChildModules != null && module.ChildModules.Count > 0)
+        {
+            <partial name="_PaintChildModules_InPermissions.cshtml" model="@module.ChildModules" />
+        }
+
+    </li>
+    }
+    </ul>

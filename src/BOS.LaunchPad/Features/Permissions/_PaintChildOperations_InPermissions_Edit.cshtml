@@ -1,0 +1,16 @@
+﻿@using BOS.IA.Client.ClientModels;
+@model List<IOperation>
+
+
+<ul class="mt-2 js_op_container">
+    @foreach (var op in Model)
+    {
+    <li class="js_operation@((op.ChildOperations == null || op.ChildOperations.Count == 0)?" js_op_child" : " js_op_parent")">
+        <input type="checkbox" @((((BOS.LaunchPad.Models.Operation)op).IsAssigned==true)?"checked":"") class="mr-2@((((BOS.LaunchPad.Models.Operation)op).IsAssigned==true)?" checked":"")" id="@op.Id" code="@op.Code">@op.Name
+        @if (op.ChildOperations != null && op.ChildOperations.Count > 0)
+        {
+            <partial name="_PaintChildOperations_InPermissions_Edit" model="@op.ChildOperations" />           
+        }
+    </li>
+    }
+</ul>

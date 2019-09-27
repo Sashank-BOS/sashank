@@ -1,0 +1,57 @@
+﻿@model BOS.LaunchPad.Features.RoleManagement.EditRoleViewModel
+@{
+    Layout = null;
+}
+<form asp-controller="RoleManagement" asp-action="EditRole" method="post">
+    <input type="hidden" asp-for="@Model.Id" />
+    <input type="hidden" asp-for="@Model.Name" />
+    <input type="hidden" asp-for="@Model.Description" />
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 form-label pt-2">
+                <label asp-for="@Model.NameRecord">Name</label>
+            </div>
+            <div class="col-md-9">
+                <div class="form-group">
+                    <input asp-for="@Model.NameRecord" class="form-control form-control-sm" autofocus />
+                    <span asp-validation-for="@Model.NameRecord" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 form-label pt-2">
+                <label asp-for="@Model.DescriptionRecord">Description</label>
+            </div>
+            <div class="col-md-9">
+                <div class="form-group">
+                    <textarea asp-for="@Model.DescriptionRecord" class="form-control form-control-sm"></textarea>
+                    <span asp-validation-for="@Model.DescriptionRecord" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="text-right">
+            <a href="~/RoleManagement/Index" data-dismiss="modal" class="cancel-link" aria-label="Close">Cancel</a>
+            <button class="btn btn-light btn-sm"> Update</button>
+        </div>
+    </div>
+</form>
+
+
+<environment include="Development">
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"
+            asp-fallback-src="~/lib/jquery-validation/dist/jquery.validate.min.js"
+            asp-fallback-test="window.jQuery && window.jQuery.validator"
+            crossorigin="anonymous"
+            integrity="sha384-rZfj/ogBloos6wzLGpPkkOr/gpkBNLZ6b6yLy4o+ok+t/SAKlL5mvXLr0OXNi1Hp">
+    </script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.9/jquery.validate.unobtrusive.min.js"
+            asp-fallback-src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"
+            asp-fallback-test="window.jQuery && window.jQuery.validator && window.jQuery.validator.unobtrusive"
+            crossorigin="anonymous"
+            integrity="sha384-ifv0TYDWxBHzvAk2Z0n8R434FL1Rlv/Av18DXE43N/1rvHyOG4izKst0f2iSLdds">
+    </script>
+</environment>

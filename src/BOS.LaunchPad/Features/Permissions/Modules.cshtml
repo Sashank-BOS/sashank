@@ -1,0 +1,141 @@
+﻿@model BOS.LaunchPad.Features.Permissions.PermissionsViewModel
+@{
+    ViewData["Title"] = "Modules";
+}
+<div>
+    <h4 class="pt-2">
+        Permissions
+    </h4>
+    <!-- Custom Coding Starts Here -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 mt-3">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" onclick="rolesTab(this);">
+                        <a class="nav-link" id="home-tab" data-toggle="tab" href="#" role="tab" aria-controls="home" aria-selected="true"><i class="fas fa-users"></i> Roles</a>
+                    </li>
+                    <li class="nav-item" onclick="usersTab(this);">
+                        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#" role="tab" aria-controls="profile" aria-selected="false"><i class="fas fa-user"></i> Users</a>
+                    </li>
+                    <li class="nav-item" onclick="modulesTab(this);">
+                        <a class="nav-link active" id="contact-tab" data-toggle="tab" href="#" role="tab" aria-controls="contact" aria-selected="false"><i class="fas fa-cube"></i> Modules</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mt-3">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span class="float-right">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="pr-4">
+                                            <a href="#" class="ui-in-page" onclick="expand();" id="expandAll"><i class="fas fa-angle-down"></i> Expand</a>
+                                            <a href="#" class="ui-in-page d-none" onclick="collapse();" id="collapseAll"><i class="fas fa-angle-up"></i> Collapse</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mt-4" id="modules">                       
+                        @foreach (var module in Model.Modules)
+                        {
+                            <div class="module">
+                                <strong><i class="fas fa-check-circle text-secondary mr-2"></i>@module.Name</strong>
+                                <ul class="mt-2 d-none">
+                                    @foreach (var operation in module.Operations)
+                                    {
+                                        <li class="js_operation@((operation.ChildOperations == null || operation.ChildOperations.Count == 0)?" js_op_child" : " js_op_parent")">
+                                            <i class="fas fa-check-circle mr-2@((((BOS.LaunchPad.Models.Operation)operation).IsAssigned==true)?" text-success":" text-secondary")"></i>@operation.Name
+                                            @if (operation.ChildOperations != null && operation.ChildOperations.Count > 0)
+                                            {
+                                                <partial name="_PaintChildOperations_InPermissions" model="@operation.ChildOperations" />
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                                @if (module.ChildModules != null && module.ChildModules.Count > 0)
+                                {
+                                    <partial name="_PaintChildModules_InPermissions.cshtml" model="@module.ChildModules" />
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<environment include="Development">
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/popper.js/popper.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+</environment>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#home").removeClass("active");
+        $("#roleManagement").removeClass("active");
+        $("#userManagement").removeClass("active");
+        $("#permissionManagement").addClass("active");
+
+    });
+
+    function rolesTab(val) {
+        if (!$(val).children().hasClass("active")) {
+            $(".nav-item").children().find('a').removeClass("active");
+            $(val).children().find('a').addClass("active");
+            location.href = "@Url.Action("Index", "Permissions")";
+        }
+    }
+
+    function usersTab(val) {
+        if (!$(val).children().hasClass("active")) {
+            $(".nav-item").children().find('a').removeClass("active");
+            $(val).children().find('a').addClass("active");
+            location.href = "@Url.Action("Users", "Permissions")";
+        }
+    }
+
+    function modulesTab(val) {
+        if (!$(val).children().find('a').hasClass("active")) {
+            $(".nav-item").children().find('a').removeClass("active");
+            $(val).children().find('a').addClass("active");
+            location.href = "@Url.Action("Modules", "Permissions")";
+        }
+    }
+
+    function expand() {
+        $("#modules").children().find('ul').removeClass("d-none").addClass("d-block");
+        $("#collapseAll").removeClass("d-none");
+        $("#expandAll").addClass("d-none");
+    }
+
+    function collapse() {
+        $("#modules").children().find('ul').addClass("d-none").removeClass("d-block");
+        $("#expandAll").removeClass("d-none");
+        $("#collapseAll").addClass("d-none");
+    }
+
+</script>
+
+
+
+
+
+
+

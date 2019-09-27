@@ -1,0 +1,16 @@
+﻿@using BOS.IA.Client.ClientModels;
+@model List<IOperation>
+
+
+<ul class="mt-2 js_op_container">
+    @foreach (var op in Model)
+    {
+    <li class="js_operation@((op.ChildOperations == null || op.ChildOperations.Count == 0)?" js_op_child" : " js_op_parent")">
+        <i class="fas fa-check-circle mr-2@((((BOS.LaunchPad.Models.Operation)op).IsAssigned==true)?" text-success":" text-secondary")"></i>@op.Name
+        @if (op.ChildOperations != null && op.ChildOperations.Count > 0)
+        {
+            <partial name="_PaintChildOperations_InPermissions" model="@op.ChildOperations" />
+        }
+    </li>
+    }
+</ul>

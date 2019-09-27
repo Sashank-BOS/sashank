@@ -1,0 +1,31 @@
+﻿@using BOS.IA.Client.ClientModels;
+@using BOS.LaunchPad.Features.Home;
+@using BOS.LaunchPad.Models;
+@model SetPermissionsViewModel
+
+
+<ul class="collapse d-none list-group list-group-flush mt-1 js_op_container d-block">
+
+    @foreach (var op in Model.Operations)
+    {
+        PermissionsSet PermissionSet = (Model.IsAdmin == false && Model.Permissions != null) ? Model.Permissions.FirstOrDefault(p => p.ReferenceId == op.ModuleId) : null;
+    <li class="list-group-item js_operation@((op.ChildOperations == null || op.ChildOperations.Count == 0)?" js_op_child" : " js_op_parent")">
+        @if (Model.IsAdmin == false && PermissionSet != null && PermissionSet.Permissions.Any(p => p.Id == op.Id) == true)
+        {
+            <i class="fas fa-check-circle mr-2 text-success"></i>@op.Name
+        }
+        else if (Model.IsAdmin)
+        {
+            <i class="fas fa-check-circle mr-2 text-success"></i>@op.Name
+        }
+        else
+        {
+            <i class="fas fa-minus-circle text-danger mr-2"></i>@op.Name
+        }
+        @if (op.ChildOperations != null && op.ChildOperations.Count > 0)
+        {
+            <partial name="_PaintChildOperations_InPermissions" model="@new SetPermissionsViewModel() { Permissions= Model.Permissions,  Operations=op.ChildOperations , IsAdmin=Model.IsAdmin}" />
+        }
+    </li>
+    }
+</ul>

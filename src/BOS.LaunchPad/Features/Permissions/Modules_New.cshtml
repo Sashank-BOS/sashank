@@ -1,0 +1,262 @@
+﻿@model BOS.LaunchPad.Features.Permissions.PermissionsViewModel
+@{
+    ViewData["Title"] = "Modules";
+}
+
+<style type="text/css">
+    .tree {
+        min-height: 20px;
+        padding: 19px;
+        margin-bottom: 20px;
+        background-color: #fbfbfb;
+        border: 1px solid #999;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+        -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05)
+    }
+
+        .tree li {
+            list-style-type: none;
+            margin: 0;
+            padding: 10px 5px 0 5px;
+            position: relative
+        }
+
+            .tree li::before, .tree li::after {
+                content: '';
+                left: -20px;
+                position: absolute;
+                right: auto
+            }
+
+            .tree li::before {
+                border-left: 1px solid #999;
+                bottom: 50px;
+                height: 100%;
+                top: 0;
+                width: 1px
+            }
+
+            .tree li::after {
+                border-top: 1px solid #999;
+                height: 20px;
+                top: 25px;
+                width: 25px
+            }
+
+            .tree li span {
+                -moz-border-radius: 5px;
+                -webkit-border-radius: 5px;
+                border: 1px solid #999;
+                border-radius: 5px;
+                display: inline-block;
+                padding: 3px 8px;
+                text-decoration: none
+            }
+
+            .tree li.parent_li > span {
+                cursor: pointer
+            }
+
+        .tree > ul > li::before, .tree > ul > li::after {
+            border: 0
+        }
+
+        .tree li:last-child::before {
+            height: 30px
+        }
+
+        .tree li.parent_li > span:hover, .tree li.parent_li > span:hover + ul li span {
+            background: #eee;
+            border: 1px solid #94a0b4;
+            color: #000
+        }
+    
+</style>
+<div>
+    <h4 class="pt-2">
+        Permissions
+    </h4>
+    <!-- Custom Coding Starts Here -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 mt-3">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" onclick="rolesTab(this);">
+                        <a class="nav-link" id="home-tab" data-toggle="tab" href="#" role="tab" aria-controls="home" aria-selected="true"><i class="fas fa-users"></i> Roles</a>
+                    </li>
+                    <li class="nav-item" onclick="usersTab(this);">
+                        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#" role="tab" aria-controls="profile" aria-selected="false"><i class="fas fa-user"></i> Users</a>
+                    </li>
+                    <li class="nav-item" onclick="modulesTab(this);">
+                        <a class="nav-link active" id="contact-tab" data-toggle="tab" href="#" role="tab" aria-controls="contact" aria-selected="false"><i class="fas fa-cube"></i> Modules</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mt-3">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span class="float-right">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="pr-4">
+                                            <a href="#" class="ui-in-page" onclick="expand();" id="expandAll"><i class="fas fa-angle-down"></i> Expand</a>
+                                            <a href="#" class="ui-in-page d-none" onclick="collapse();" id="collapseAll"><i class="fas fa-angle-up"></i> Collapse</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mt-4" id="modules">
+                        <div class="tree well">
+                            <ul>
+                                @foreach (var module in Model.Modules)
+                                {
+                                    <li class="mt-3">
+                                        <span><i class="icon-folder-open"></i> @module.Name</span>
+                                        <a href="">Goes somewhere</a>
+                                        <ul>
+                                            @foreach (var operation in module.Operations)
+                                            {
+                                                <li>
+                                                    <span><i class="icon-minus-sign"></i> @operation.Name</span>
+                                                    <a href="">Goes somewhere</a>
+                                                </li>
+                                                @if (operation.ChildOperations != null)
+                                                {
+                                                    <partial name="_PaintChildOperations" model="@operation.ChildOperations" />
+                                                }
+                                            }
+
+                                            </ul>
+                                        @if (module.ChildModules != null)
+                                        {
+                                            <partial name="_PaintChildModules" model="@module.ChildModules" />
+                                        }
+                                    </li>                                   
+                                }
+                            </ul>
+                        </div>
+                        @*<ul class="list-group list-group-flush">
+
+                            @foreach (var module in Model.Modules)
+                            {
+                                <li>
+                                    <strong>@module.Name</strong>
+
+                                    <ul class="mt-2">
+                                        @foreach (var operation in module.Operations)
+                                        {
+                                            <li>@operation.Name</li>
+                                            @if (operation.ChildOperations != null)
+                                            {
+                                                <partial name="_PaintChildOperations" model="@operation.ChildOperations" />
+                                            }
+                                        }
+                                    </ul>
+                                    @if (module.ChildModules != null)
+                                    {
+                                        <partial name="_PaintChildModules" model="@module.ChildModules" />
+                                    }
+                                </li>
+                            }
+                        </ul>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<environment include="Development">
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/popper.js/popper.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+</environment>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#home").removeClass("active");
+        $("#roleManagement").removeClass("active");
+        $("#userManagement").removeClass("active");
+        $("#permissionManagement").addClass("active");
+
+    });
+
+    function rolesTab(val) {
+        if (!$(val).children().hasClass("active")) {
+            $(".nav-item").children().find('a').removeClass("active");
+            $(val).children().find('a').addClass("active");
+            location.href = "@Url.Action("Index", "Permissions")";
+        }
+    }
+
+    function usersTab(val) {
+        if (!$(val).children().hasClass("active")) {
+            $(".nav-item").children().find('a').removeClass("active");
+            $(val).children().find('a').addClass("active");
+            location.href = "@Url.Action("Users", "Permissions")";
+        }
+    }
+
+    function modulesTab(val) {
+        if (!$(val).children().find('a').hasClass("active")) {
+            $(".nav-item").children().find('a').removeClass("active");
+            $(val).children().find('a').addClass("active");
+            location.href = "@Url.Action("Modules", "Permissions")";
+        }
+    }
+
+    function expand() {
+        $("#modules").children().find('ul').removeClass("d-none").addClass("d-block");
+        $("#collapseAll").removeClass("d-none");
+        $("#expandAll").addClass("d-none");
+    }
+
+    function collapse() {
+        $("#modules").children().find('ul').addClass("d-none").removeClass("d-block");
+        $("#expandAll").removeClass("d-none");
+        $("#collapseAll").addClass("d-none");
+    }
+
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
+        $('.tree li.parent_li > span').on('click', function (e) {
+            var children = $(this).parent('li.parent_li').find(' > ul > li');
+            if (children.is(":visible")) {
+                children.hide('fast');
+                $(this).attr('title', 'Expand this branch').find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
+            } else {
+                children.show('fast');
+                $(this).attr('title', 'Collapse this branch').find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
+            }
+            e.stopPropagation();
+        });
+    });
+
+</script>
+
+
+
+
+

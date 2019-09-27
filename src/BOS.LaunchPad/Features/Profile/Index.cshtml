@@ -1,0 +1,185 @@
+﻿@model BOS.LaunchPad.Features.Profile.ProfileViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Profile";
+}
+@{
+    var eMessage = ""; var sMessage = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("ErrorMessage") != null)
+    {
+        eMessage = HttpContextAccessor.HttpContext.Session.GetString("ErrorMessage");
+        HttpContextAccessor.HttpContext.Session.Remove("ErrorMessage");
+    }
+    if (HttpContextAccessor.HttpContext.Session.GetString("SuccessMessage") != null)
+    {
+        sMessage = HttpContextAccessor.HttpContext.Session.GetString("SuccessMessage");
+        HttpContextAccessor.HttpContext.Session.Remove("SuccessMessage");
+    }
+}
+<script type="text/javascript">
+    var errorMessage = "@eMessage";
+    var successMessage = "@sMessage";
+</script>
+<div class="container p-0 m-0">
+    <div class="row">
+        <div class="col-md-6 pt-2">
+            <h4>
+                Profile
+            </h4>
+        </div>
+        <div class="col-6 text-right">
+            <button class="btn btn-secondary btn-sm" style="float: right" onclick="userChangePassword()"><i class="fa fa-key"></i> Change Password</button>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-3 p-3 text-center">
+            <!-- Profile -->
+            <div class="mx-auto mt-3 profile-avatar">
+                <div class="row">
+                    <div class="col-md-12">
+                        <img src="~/images/sample-headshot.jpeg" alt="Headshot Lg">
+                    </div>
+                    <div class="col-md-12 d-none">
+                        <div class="btn-group mt-3 mx-auto">
+                            <button class="btn btn-secondary btn-sm">Remove</button>
+                            <button class="btn btn-secondary btn-sm ml-1">Update</button>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+        <div class="col-4 p-3">
+            <form class="mt-3" asp-controller="Profile" asp-action="Edit" method="post">
+                <input type="hidden" asp-for="@Model.User.Id" />
+                <input type="hidden" asp-for="@Model.User.Email" />
+                <input type="hidden" asp-for="@Model.User.Username" />
+                <input type="hidden" asp-for="@Model.User.FirstName" />
+                <input type="hidden" asp-for="@Model.User.LastName" />
+                <div class="form-group">
+                    <label asp-for="@Model.NewFirstName">First Name</label>
+                    <input asp-for="@Model.NewFirstName" class="form-control form-control-sm">
+                    <span asp-validation-for="@Model.NewFirstName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.NewLastName">Last Name</label>
+                    <input asp-for="@Model.NewLastName" class="form-control form-control-sm">
+                    <span asp-validation-for="@Model.NewLastName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.NewEmail">Email</label>
+                    <input asp-for="@Model.NewEmail" class="form-control form-control-sm">
+                    <span asp-validation-for="@Model.NewEmail" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.NewUsername">Username</label>
+                    <input asp-for="@Model.NewUsername" class="form-control form-control-sm">
+                    <span asp-validation-for="@Model.NewUsername" class="text-danger"></span>
+                </div>
+                @if (Model.User.Roles.Count > 0)
+                {
+                    <div class="mt-4">
+                        <dl>
+                            <dt class="mb-3">Roles</dt>
+                            @foreach (var r in Model.User.Roles)
+                            {
+                                <dd class="ml-3">@r.Role.Name</dd>
+                            }
+                        </dl>
+                    </div>
+                }
+                <div class="text-right">
+                    <a href="~/Profile/Index" class="cancel-link mr-3">Cancel</a>
+                    <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-check"></i> Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-5 p-3"></div>
+</div>
+
+<div class="modal fade" id="userChangePasswordModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userChangePasswordModalTitle">
+                    Change Password
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="userChangePasswordBody">
+                .....
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<environment include="Development">
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+</environment>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        if (errorMessage != "") {
+            displayDialog(errorMessage);
+        }
+
+        if (successMessage != "") {
+            displayDialog(successMessage, "success");
+        }
+
+        $("#sidebar-master").children().find(".nav-item").removeClass("active");
+        $("#myprofile").addClass("active");
+
+    });
+
+    function userChangePassword() {
+
+        $('#userChangePasswordBody').html("");
+        $.get("@Url.Action("ChangePassword", "Profile")",
+            function (data) {
+                $('#userChangePasswordBody').html(data);
+            });
+        $('#userChangePasswordModal').modal('show');
+
+    }
+
+    function displayDialog(message, mode) {
+        var displayClass = "alert-danger";
+        if (mode == "") {
+            displayClass = "alert-danger";
+        }
+        else {
+            displayClass = "alert-success";
+        }
+        var dialog = '<div id="display_message" class="alert ' + displayClass + ' alert-dismissible fade show">'
+            + '' + message + ''
+            + '<a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>'
+            + '</div>';
+        $("body").append($(dialog));
+        setTimeout(function () {
+            $("#display_message").remove();
+        }, 5000);
+    }
+
+    
+</script>
+
